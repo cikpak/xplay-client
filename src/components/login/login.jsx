@@ -62,9 +62,9 @@ const Login = ({ auth }) => {
   };
 
   return (
-    <Container className="h-100">
-      <Row className="h-75 justify-content-center align-items-center">
-        <Col xs={10} className="shadow" id="loginForm">
+    <Container className="vh-100">
+      <Row className="h-100 justify-content-center align-items-center">
+        <Col xs={10}>
           <Row className="h-100 d-flex justify-content-center align-items-center">
             <Col xs={6} className="d-flex align-self-center">
               <img
@@ -74,7 +74,7 @@ const Login = ({ auth }) => {
                 id="loginLogo"
               />
             </Col>
-            <Col xs={6} className="">
+            <Col xs={6}  className="shadow" id="loginForm">
               <h2 className="text-center">Please login</h2>
               <hr />
               <Form onSubmit={loginHandler}>
@@ -97,7 +97,7 @@ const Login = ({ auth }) => {
                     required
                   />
                 </Form.Group>
-                <Button variant="outline-dark" type="submit" block>
+                <Button variant="success" type="submit" block>
                   Login
                 </Button>
               </Form>

@@ -10,22 +10,21 @@ import EditModal from './CopyIpModal.jsx'
 import axios from 'axios'
 import Main from './main.jsx'
 import env from '../../env'
-const storage = require('electron-json-storage')
-const path = storage.getDataPath()
 
+const store = require('../../store')
 
 class Controller extends Component {
     constructor(props) {
         super(props)
 
         this.state = ({
-            isLoading: false,
-            err: null,
-            showModal: false,
-            showCopyIp: false,
-            readyToPlay: true,
             editParameter: '',
-            ip: null
+            readyToPlay: true,
+            showCopyIp: false,
+            isLoading: false,
+            showModal: false,
+            err: null,
+            ip: null,
         })
 
         this.updateRaspberryIp = this.updateRaspberryIp.bind(this)
@@ -55,7 +54,6 @@ class Controller extends Component {
         payload['src_ip'] = appConfig.apiVersion === '1' ? clientConfig.network.clientZerotierIp : clientConfig.network.clientTailscaleIp
         payload[appConfig.apiVersion === '1' ? 'zerotier_network_id' : 'tailscale_id'] = appConfig.apiVersion === '1' ? clientConfig.network.zerotierId : clientConfig.network.tailscaleId
 
-        console.log('payload :>> ', payload);
         try {
             const response = await axios({
                 url,
@@ -81,7 +79,11 @@ class Controller extends Component {
     }
 
     configSaveHandler = async () => {
-        const { auth, clientConfig } = this.props
+        const { auth, clientConfig, appConfig } = this.props
+
+        store.set({
+            'apiVersion': appConfig.apiVersion
+        })
 
         const response = await axios({
             url: env.SAVE_CONFIG_URL,
@@ -92,15 +94,14 @@ class Controller extends Component {
             },
             data: clientConfig,
         });
-
-        console.log('response :>> ', response);
     }
 
     setUserConfig = async () => {
-        const { auth } = this.props
+        const { auth, setApiVersion } = this.props
         window.addEventListener('beforeunload', this.configSaveHandler, false)
 
         try {
+            setApiVersion(store.get('apiVersion'))
             const url = env.GET_USER_INFO_URL
 
             const response = await axios({
@@ -112,6 +113,7 @@ class Controller extends Component {
 
             const { user } = response.data
             const { clientConfig, ...userInfo } = user
+
             this.props.setClientConfig(clientConfig)
             this.props.setUserInfo(userInfo)
         } catch (err) {
@@ -167,11 +169,9 @@ class Controller extends Component {
 
         if (response.status === 200) {
             const { data } = response
-
             const config = {}
 
             config[appConfig.apiVersion === '1' ? 'zerotierIp' : 'tailscaleIp'] = data.rasp_ip
-
             this.props.updateNetworkConfig(config)
         } else {
             //TODO - toast
@@ -181,7 +181,6 @@ class Controller extends Component {
 
     getClientVpnIp = async () => {
         const { clientConfig, appConfig } = this.props
-
         let config = {}
 
         if (appConfig.apiVersion === '1') {
@@ -243,8 +242,6 @@ class Controller extends Component {
     }
 
     updateParameterHandler = (value) => {
-        console.log('this.state.editParameter :>> ', this.state.editParameter);
-        console.log('value :>> ', value);
         const { updateNetworkConfig } = this.props
         const { editParameter } = this.state
 

@@ -5,13 +5,13 @@ import { faPlay, faSignOutAlt, faSyncAlt, faPlayCircle, faEdit } from '@fortawes
 import './styles.scss'
 
 
-
 const Main = ({ auth, userInfo, clientConfig, getRaspberryIp, handlePlay, getXboxIp, getClientZerotierIp, getClientVpnIp, openCompanion, showEditModal, getRaspberryVpnIp, setApiVersion, appConfig }) => {
   const { network, raspberryLocalIp, xboxId, xboxIp } = clientConfig
   const { apiVersion } = appConfig
   const { nickname } = userInfo
   const { logout } = auth
 
+  console.log('apiVersion', apiVersion)
 
   return (
     <Container fluid id='mainContainer' className='vh-100'>
@@ -21,7 +21,7 @@ const Main = ({ auth, userInfo, clientConfig, getRaspberryIp, handlePlay, getXbo
         <Col sm='3'>
           <Form.Group controlId="exampleForm.SelectCustom">
             <Form.Label>VPN client:</Form.Label>
-            <Form.Control as="select" onChange={setApiVersion}>
+            <Form.Control as="select" onChange={setApiVersion} value={apiVersion}>
               <option value='1' >Zerotier</option>
               <option value='2' >Tailscale</option>
             </Form.Control>

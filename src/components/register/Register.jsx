@@ -2,24 +2,15 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap'
 import { NavLink } from 'react-router-dom'
 
-const Register = ({ registerHandler }) => {
-    const [form, setForm] = useState({});
-
-    const fieldChangeHandler = (event) => {
-        setForm(
-            Object.assign({}, form, {
-                [event.target.name]: event.target.value
-            })
-        )
-    }
+const Register = ({ registerHandler, fieldChangeHandler }) => {
 
     return (
-        <Container className="h-100">
-            <Row className="h-75 justify-content-center align-items-center">
+        <Container className='vh-100'>
+            <Row className="h-100 justify-content-center align-items-center">
                 <Col xs={8} className="shadow" id="loginForm">
                     <h2 className="text-center">Register</h2>
                     <hr />
-                    <Form onSubmit={(event) => {event.preventDefault(); registerHandler(form)}}>
+                    <Form onSubmit={registerHandler}>
                         <Row>
                             <Col>
                                 <Form.Group>
@@ -101,11 +92,13 @@ const Register = ({ registerHandler }) => {
                             </Col>
                         </Row>
 
-                        <Button variant="outline-dark" type="submit" block>
+                        <Button variant="success" type="submit" block>
                             Register
                         </Button>
                         <p className='text-center my-0'>or</p>
-                        <NavLink exact to='/login' className='d-block text-center'>Login</NavLink>
+                        <div className="text-center">
+                            <NavLink exact to='/login' className=''>Login</NavLink>
+                        </div>
                     </Form>
                 </Col>
             </Row>

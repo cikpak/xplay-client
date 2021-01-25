@@ -54,6 +54,8 @@
     "babel-preset-stage-2": "^6.24.1",
     "bootstrap": "^4.5.3",
     "electron-json-storage": "^4.3.0",
+    "electron-settings": "^4.0.2",
+    "electron-store": "^7.0.0",
     "node-cmd": "^4.0.0",
     "postcss-loader": "^4.1.0",
     "react-bootstrap": "^1.4.0",

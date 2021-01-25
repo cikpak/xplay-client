@@ -3,6 +3,10 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const url = require("url");
+
+let Store = require('electron-store')
+const store = new Store()
+
 let mainWindow;
 
 let dev = false;
@@ -21,7 +25,7 @@ function createWindow() {
     show: false,
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      // enableRemoteModule: true
     },
   });
 
