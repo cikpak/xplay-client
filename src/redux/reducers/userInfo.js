@@ -1,11 +1,12 @@
 import { SET_USER_INFO } from "../actionTypes";
 
 const initialState = {
-    email: undefined,
-    firstname: undefined,
-    lastname: undefined,
-    nickname: undefined,
-    _id: undefined
+  email: undefined,
+  firstname: undefined,
+  lastname: undefined,
+  nickname: undefined,
+  avatar: undefined,
+  _id: undefined
 };
 
 export default (state = initialState, action) => {

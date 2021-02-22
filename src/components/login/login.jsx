@@ -1,10 +1,10 @@
 import React from "react";
 import { Button, Form, Container, Row, Col } from "react-bootstrap";
+import logo from "../../assets/images/logo-green-black.png";
+import { useToasts } from "react-toast-notifications";
 import { useForm } from "../../hooks/form.hook";
 import { useHistory } from "react-router-dom";
-import { useToasts } from "react-toast-notifications";
 import { NavLink } from 'react-router-dom'
-import logo from "../../assets/images/logo-green-black.png";
 import "../../assets/css/login.css";
 import env from '../../env'
 
@@ -12,28 +12,23 @@ const Login = ({ auth }) => {
   const [
     fieldChangeHandler,
     formSubmitHandler,
-    setFormManualy,
-    addFieldToForm,
-    loading,
-    err,
   ] = useForm();
+
   const history = useHistory();
   const { addToast } = useToasts();
 
   const loginHandler = async (event) => {
     event.preventDefault();
-    const form = event.target;
 
     try {
       const url = env.LOGIN_URL_URL;
-      console.log('url', url)
       const response = await formSubmitHandler({ url });
 
       try {
         if (response.status === 200) {
           const { token, refreshToken, expiresIn, user } = response.data;
           const { clientConfig, ...userData } = user;
-
+          
           await auth.login({
             token,
             refreshToken,
@@ -74,7 +69,7 @@ const Login = ({ auth }) => {
                 id="loginLogo"
               />
             </Col>
-            <Col xs={6}  className="shadow" id="loginForm">
+            <Col xs={6} className="shadow" id="loginForm">
               <h2 className="text-center">Please login</h2>
               <hr />
               <Form onSubmit={loginHandler}>

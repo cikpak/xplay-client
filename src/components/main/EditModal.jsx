@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+
 import { Modal, InputGroup, FormControl, Button } from 'react-bootstrap'
 
 const EditModal = ({ show, parameter, setShow, updateParameter }) => {

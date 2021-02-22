@@ -7,7 +7,7 @@ const initialState = {
     tailscaleIp: undefined,
     zerotierIp: undefined,
     clientTailscaleIp: undefined,
-    clientZarotierIp: undefined
+    clientZerotierIp: undefined
   },
   xboxId: undefined,
   xboxIp: undefined,
@@ -23,7 +23,6 @@ export default function (state = initialState, action) {
       };
     }
     case UPDATE_NETWORK_DATA: {
-      console.log('action.payload', action.payload)
       return {
         ...state,
         network: {

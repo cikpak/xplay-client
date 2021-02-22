@@ -40,6 +40,7 @@ export const useAuth = () => {
         userInfo: userData,
         userConfig,
       });
+
       //save tokens pair
       await updateTokens({
         token,

@@ -7,7 +7,7 @@ export const setClientConfig = (config) => ({
 
 export const updateNetworkConfig = (config) => ({
   type: UPDATE_NETWORK_DATA,
-  payload: { ...config }
+  payload: config
 })
 
 export const setUserInfo = (info) => ({

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import Register from './Register.jsx'
-import RegisterSuccess from './RegisterSuccess.jsx'
-import axios from 'axios'
-import env from '../../env'
-import './style.scss'
 import { withToastManager } from 'react-toast-notifications'
+import RegisterSuccess from './RegisterSuccess.jsx'
+import Register from './Register.jsx'
+import env from '../../env'
+import axios from 'axios'
+import './style.scss'
 
 class RegisterController extends Component {
     constructor(props) {

@@ -1,6 +1,8 @@
 import env from "../env.js";
+import store from '../store'
 
 export const useLocalStore = () => {
+
   const getUserConfig = async () => {
     try {
       const userConfig = localStorage.getItem(env.CONFIG_STORAGE_NAME);
@@ -88,6 +90,8 @@ export const useLocalStore = () => {
       console.error(err);
       return undefined;
     }
+
+    
   };
 
   return [

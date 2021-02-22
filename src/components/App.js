@@ -1,13 +1,13 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "../assets/global.css";
-import React from "react";
-import { Provider } from "react-redux";
-import store from "../redux/store";
-import { useAuth } from "../hooks/auth.hook";
-import { useRoutes } from "../routes";
-import { HashRouter } from "react-router-dom";
 import { ToastProvider } from "react-toast-notifications";
 import { AuthContext } from "../context/auth.context";
+import { HashRouter } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { useAuth } from "../hooks/auth.hook";
+import { Provider } from "react-redux";
+import { useRoutes } from "../routes";
+import store from "../redux/store";
+import "../assets/global.css";
+import React from "react";
 
 const App = () => {
   const [state, logout, login] = useAuth();

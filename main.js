@@ -1,15 +1,15 @@
 "use strict";
 
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const url = require("url");
-
+require('./ipc/mainWindow')
 let Store = require('electron-store')
 const store = new Store()
 
+let dev = false;
 let mainWindow;
 
-let dev = false;
 if (
   process.defaultApp ||
   /[\\/]electron-prebuilt[\\/]/.test(process.execPath) ||
@@ -23,9 +23,10 @@ function createWindow() {
     width: 1024,
     height: 768,
     show: false,
+    center: true,
+    title: 'XPlay client | Beta',
     webPreferences: {
       nodeIntegration: true,
-      // enableRemoteModule: true
     },
   });
 
@@ -53,6 +54,14 @@ function createWindow() {
       mainWindow.webContents.openDevTools();
     }
   });
+
+  // ipcMain.on('resize-to-login', (event, args) => {
+  //   mainWindow.setSize(1024, 750)
+  // })
+
+  // ipcMain.on('resize-to-main', (event, args) => {
+  //   mainWindow.setSize(460, 650)
+  // })
 
   mainWindow.on("closed", function () {
     mainWindow = null;
