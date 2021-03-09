@@ -1,4 +1,4 @@
-import { SET_USER_INFO } from "../actionTypes";
+import { SET_USER_INFO, UPDATE_USER_INFO } from "../actionTypes";
 
 const initialState = {
   email: undefined,
@@ -6,6 +6,7 @@ const initialState = {
   lastname: undefined,
   nickname: undefined,
   avatar: undefined,
+  isClientConfigured: false,
   _id: undefined
 };
 
@@ -16,6 +17,12 @@ export default (state = initialState, action) => {
         ...state,
         ...action.payload,
       };
+    }
+    case UPDATE_USER_INFO: {
+      return {
+        ...state,
+        ...action.payload
+      }
     }
     default:
       return state;

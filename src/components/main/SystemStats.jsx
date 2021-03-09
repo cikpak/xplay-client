@@ -1,6 +1,8 @@
-import { Row, Col, Container } from 'react-bootstrap'
+import { Row, Col, Container, Dropdown } from 'react-bootstrap'
 import React from 'react'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import xbox from '../../assets/images/xbox.png'
 import controller from '../../assets/images/controller.png'
 import ethernet from '../../assets/images/ethernet.png'
@@ -26,21 +28,33 @@ export default function SystemStats({ systemStats }) {
                 <img src={xbox} alt="xbox console" id='xboxImage' />
             </Row>
             <Row className='mt-2'>
-                <Col xs={10} className='m-auto text-center'>
+                <Col xs={12} className='m-auto text-center'>
                     <Row>
-                        <Col xs={4}>
+                        <Col xs={4} className='system-stats'>
                             <div className="stat-icon-wrapper">
                                 <img src={controller} alt="controller" className='stat-icon' />
                             </div>
                             <span>connected</span>
                         </Col>
-                        <Col xs={4}>
+                        <Col xs={4} className='dropdown-wrapper'>
                             <div className="stat-icon-wrapper">
                                 <img src={raspberry} alt="raspberry" className='stat-icon' />
                             </div>
-                            <span>{systemStats.raspberry ? 'connected' : 'disconnected'}</span>
+                            <Dropdown>
+                                <Dropdown.Toggle as='div' className='d-flex justify-content-center align-content-center'>
+                                    <div className='mr-1'>{systemStats.raspberry ? 'connected' : '!connected'}</div>
+                                    <FontAwesomeIcon icon={faChevronDown} className='mt-1' />
+                                </Dropdown.Toggle>
+
+                                <Dropdown.Menu>
+                                    <Dropdown.Header>Raspberry</Dropdown.Header>
+
+                                    <Dropdown.Item>Reconnect</Dropdown.Item>
+                                    <Dropdown.Item>Restart</Dropdown.Item>
+                                </Dropdown.Menu>
+                            </Dropdown>
                         </Col>
-                        <Col xs={4}>
+                        <Col xs={4} className='system-stats'>
                             <div className="stat-icon-wrapper">
                                 <img src={systemStats.network.wifi ? wifi : systemStats.network.ethernet ? ethernet : question} alt={systemStats.network.wifi ? 'wifi' : 'ethernet'} className='stat-icon' />
                             </div>

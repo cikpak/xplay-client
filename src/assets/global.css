@@ -24,3 +24,16 @@ body {
   height: 100%;
   font-family: Montserrat ;
 }
+
+.react-toast-notifications__container::-webkit-scrollbar {
+  display: none;
+}
+
+.recharts-wrapper{
+  overflow: hidden !important;
+  margin: auto;
+}
+
+.react-toast-notifications__container {
+  left: 0;
+}

@@ -1,7 +1,7 @@
 const { run } = require('node-cmd')
 const path = require('path')
-// const IPERF_PATH = path.normalize('../../scripts/iperf3.exe')
-const IPERF_PATH = 'C:\\Users\\cikpak\\Desktop\\xplay-client\\scripts\\iperf3.exe'
+console.log('__dirname', __dirname)
+const IPERF_PATH = path.resolve('./scripts/iperf3.exe')
 
 const formatData = (data, host) => {
     let lostPackages = false
@@ -29,18 +29,17 @@ const formatData = (data, host) => {
         return response
     } catch (err) {
         console.log('err', err)
+        return {}
     }
 }
 
-
-const testConnection = async (raspIp, callback) => {
+const testConnection = (raspIp, callback) => {
     try {
         const command = `${IPERF_PATH} -c ${raspIp} -J`
         run(command, (err, data, stderr) => {
-            console.log('data', data)
-
             if (err) {
-                return callback(null, 'huiac si eroareeeeeee :(')
+                console.log('err', err)
+                return callback(null, 'Iperf service is unavailable!')
             }
 
             let parsedData = {}
@@ -49,16 +48,15 @@ const testConnection = async (raspIp, callback) => {
                 parsedData = JSON.parse(data)
             } catch (err) {
                 console.log('err', err)
-                return callback(null, 'huiac si eroare!!')
+                return callback(null, 'Invalid iperf response!')
             }
 
             const host = parsedData.start.connecting_to.host
-            console.log('host', host)
             return callback(formatData(parsedData, host), null)
         })
     } catch (err) {
         console.log('------------------------------err------------------------------\n', err)
-        return undefined
+        rcallback(null, 'Error ocured while net test!')
     }
 }
 

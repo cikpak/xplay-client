@@ -8,7 +8,7 @@ const Register = ({ registerHandler, fieldChangeHandler }) => {
     return (
         <Container className='vh-100'>
             <Row className="h-100 justify-content-center align-items-center">
-                <Col xs={8} className="shadow" id="loginForm">
+                <Col xs={11} className="shadow" id="loginForm">
                     <h2 className="text-center">Register</h2>
                     <hr />
                     <Form onSubmit={registerHandler}>

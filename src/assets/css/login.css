@@ -1,11 +1,16 @@
-#loginForm{
-    padding: 30px 20px;
-    border-radius: 10px;
-    background-color: white;
+#loginForm {
+  padding: 30px 20px;
+  border-radius: 10px;
+  background-color: white;
 }
 
-#loginLogo{
-    width: 150px;
-    height: auto;
-    margin: 0 auto;
+#loginLogo {
+  width: 150px;
+  height: auto;
+  margin: 0 auto;
 }
+
+.react-toast-notifications__container::-webkit-scrollbar {
+  display: none;
+}
+

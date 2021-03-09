@@ -2,3 +2,7 @@ h1 {
   font-family: helvetica;
   font-weight: 200;
 }
+
+.react-toast-notifications__container::-webkit-scrollbar {
+  display: none;
+}

@@ -6,10 +6,11 @@ const packageJson = require('../package.json')
 
 let options = {
     appId: packageJson.appId,
-    artifactName: `${packageJson.name}-setup-${packageJson.version}.exe`,
+    artifactName: `${packageJson.name}-${packageJson.version}.exe`,
     productName: packageJson.productName,
     directories: {
-        output: 'builds',
+        // buildResources: "./src",
+        output: 'releases',
     },
     win: {
         target: [
@@ -22,6 +23,7 @@ let options = {
         ],
         icon: "../src/assets/images/icon.ico",
     },
+    extraFiles: ['./scripts']
 }
 
 builder.build({

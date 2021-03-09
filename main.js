@@ -1,9 +1,12 @@
 "use strict";
+const { app, BrowserWindow } = require("electron");
 
-const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const url = require("url");
+
 require('./ipc/mainWindow')
+
+//create electrone-store instance
 let Store = require('electron-store')
 const store = new Store()
 
@@ -20,10 +23,11 @@ if (
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    width: 470,
+    height: 700,
     show: false,
     center: true,
+    // resizable: false,
     title: 'XPlay client | Beta',
     webPreferences: {
       nodeIntegration: true,
@@ -50,18 +54,11 @@ function createWindow() {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
+
     if (dev) {
       mainWindow.webContents.openDevTools();
     }
   });
-
-  // ipcMain.on('resize-to-login', (event, args) => {
-  //   mainWindow.setSize(1024, 750)
-  // })
-
-  // ipcMain.on('resize-to-main', (event, args) => {
-  //   mainWindow.setSize(460, 650)
-  // })
 
   mainWindow.on("closed", function () {
     mainWindow = null;

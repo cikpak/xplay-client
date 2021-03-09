@@ -1,6 +1,5 @@
 node_modules
-builds
+package-lock.json
 dist
 experimental
-release-builds
-release
+releases

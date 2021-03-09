@@ -1,0 +1,18 @@
+#backgroundLogo {
+  position: absolute;
+  transform: scale(1.1);
+  bottom: 0;
+  left: -180px;
+  z-index: 1;
+  width: 140vw;
+  opacity: 0.8;
+}
+
+#loginForm {
+  z-index: 2;
+}
+
+.img-container {
+  overflow: hidden;
+  position: relative;
+}

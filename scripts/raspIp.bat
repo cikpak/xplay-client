@@ -5,12 +5,15 @@ set "port=8000"
 set "message=Server is working!"
 
 :: get local ip
-for /f "tokens=8" %%a in ('tracert -d -h 1 -w 1 -4 1.1.1.1 ^| find "<"') do set "GateWay=%%a"
+for /f "tokens=8" %%a in ('tracert -d -h 1 -w 1 -4 1.1.1.1 ^| find "ms"') do set "GateWay=%%a"
+::echo gate = "%GateWay%"
 for /f "tokens=3-4" %%a in ('route print -4 ^| find "%GateWay%"') do set "localip=%%b"& goto ext
 :ext
+::echo ip = "%localip%"
 :: get binded ip
 del /f /a net_*.log 2>NUL >NUL
 for /f %%a in ('arp -a -N %localip% ^| find /v "---" ^| find "-"') do (
+rem echo ps - %%a:%port%
 	start "" /b powershell.exe -executionpolicy bypass -command "Invoke-RestMethod -Uri %%a:%port% -TimeoutSec 1 > net_%%a.log 2>$null" 2>NUL
 )
 set sec=0

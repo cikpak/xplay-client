@@ -5,20 +5,23 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Container, Button, Dropdown } from 'react-bootstrap'
 import avatar from '../../assets/images/avatar.png'
 import logo from '../../assets/images/xplay.png'
+import NetTestError from './NetTestError.jsx'
 import SystemStats from './SystemStats.jsx'
 import NetStats from './NetStats.jsx'
 import './styles.scss'
 import env from '../../env'
 
-const Main = ({ auth, user, showAccountModal, handlePlay, showSettingsModal, stats, testNetConnection, whatIsLoading, data, systemStats }) => {
+const Main = ({ auth, user, showAccountModal, showAboutModal, handlePlay, showSettingsModal, stats, testNetConnection, whatIsLoading, data, systemStats }) => {
+
+
   return <div id='main'>
     <Container fluid id="mainHeader" className='d-flex justify-content-between align-items-center py-1 shadow'>
       <div>
         <img src={logo} alt='XPlay logo' />
       </div>
 
-      <div className="" id='avatarContainer' >
-        <Dropdown> 
+      <div id='avatarContainer' >
+        <Dropdown>
           <Dropdown.Toggle>
             <img src={(user.avatar !== '' && user.avatar) ? `${env.API_BASE_URL}${user.avatar}` : avatar} alt='user avatar' className='rounded-circle mr-1' />
             <FontAwesomeIcon icon={faChevronDown} />
@@ -28,6 +31,7 @@ const Main = ({ auth, user, showAccountModal, handlePlay, showSettingsModal, sta
             <Dropdown.Item onClick={showAccountModal}>Account</Dropdown.Item>
             <Dropdown.Item onClick={showSettingsModal}>Settings</Dropdown.Item>
             <Dropdown.Divider />
+            <Dropdown.Item onClick={showAboutModal}>About</Dropdown.Item>
             <Dropdown.Item onClick={auth.logout}>Logout</Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>

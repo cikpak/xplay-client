@@ -3,7 +3,7 @@ import { Modal, Form, Col, Row, ListGroup, Button } from 'react-bootstrap'
 import { faSyncAlt, faEdit, faSave } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, updateNetworkConfig, setClientConfig, appConfig, setApiVersion, getXboxIp, getRaspberryIp, getClientVpnIp, getRaspberryVpnIp, configSaveHandler }) => {
+const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, user, updateNetworkConfig, setClientConfig, appConfig, setApiVersion, getXboxIp, getRaspberryIp, getClientVpnIp, getRaspberryVpnIp, configSaveHandler }) => {
 	const { network, raspberryLocalIp, xboxId, xboxIp } = clientConfig
 	const { apiVersion } = appConfig
 	const [fieldValue, setFieldValue] = useState({})
@@ -55,7 +55,7 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, updateNetwo
 					</Col>
 
 					<Col sm='12'>
-						<h5 className='text-center'>Client config</h5>
+						<h5 className='text-center'>Client config | Configured: {user.isClientConfigured ? 'true' : 'false'}</h5>
 						<ListGroup.Item>
 							<div className="row">
 								<div className="col-5">
@@ -87,7 +87,7 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, updateNetwo
 						<ListGroup.Item>
 							<div className="row">
 								<div className="col-5">
-									<b className='mr-2 d-block text-right'>Client {apiVersion === '1' ? 'zerotier' : 'tailscale'} IP:</b>
+									<b className='mr-2 d-block text-right'>{apiVersion === '1' ? 'zerotier' : 'tailscale'} IP:</b>
 								</div>
 								<div className="col-5">
 									{apiVersion === '1' ? network.clientZerotierIp ? network.clientZerotierIp : 'unknown' : network.clientTailscaleIp ? network.clientTailscaleIp : 'uknown'}
@@ -153,7 +153,7 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, updateNetwo
 											{
 												canBeEdited.tailscaleId ?
 													<Form.Control type="text" name='tailscaleId' ref={tailscaleIdRef} onChange={event => setFieldValue({ ...fieldValue, 'tailscaleId': event.target.value })} /> :
-													network.tailscaleId || 'unknown'
+													network.tailscaleId ? `${network.tailscaleId.slice(0, 8)}...${network.tailscaleId.slice(network.tailscaleId.length - 5)} ` : 'unknown'
 											}
 										</div>
 										<div className="col-2">
@@ -209,7 +209,7 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, updateNetwo
 			</Modal.Body>
 
 			<Modal.Footer>
-				<Button variant='secondary' onClick={setShow}>Close</Button>
+				{/* <Button variant='secondary' onClick={setShow}>Close</Button> */}
 				<Button variant='primary' onClick={configSaveHandler}>Save</Button>
 			</Modal.Footer>
 		</Modal>

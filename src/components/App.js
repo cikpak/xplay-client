@@ -11,6 +11,7 @@ import React from "react";
 
 const App = () => {
   const [state, logout, login] = useAuth();
+  document.title = 'XPlay'
 
   const authState = {
     isAuthenticated: state.isAuthenticated,
@@ -26,7 +27,7 @@ const App = () => {
   return (
     <HashRouter>
       <AuthContext.Provider value={authState}>
-        <ToastProvider placement="bottom-center">
+        <ToastProvider>
           <Provider store={store}>
             {routes}
           </Provider>
