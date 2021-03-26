@@ -11,7 +11,7 @@ import NetStats from './NetStats.jsx'
 import './styles.scss'
 import env from '../../env'
 
-const Main = ({ auth, user, showAccountModal, showAboutModal, handlePlay, showSettingsModal, stats, testNetConnection, whatIsLoading, data, systemStats }) => {
+const Main = ({ auth, user, showAccountModal, tryPowerOnXbox, handleSocketRefresh, handleRaspberryReboot, showAboutModal, handlePlay, showSettingsModal, stats, testNetConnection, whatIsLoading, data, systemStats }) => {
 
 
   return <div id='main'>
@@ -28,6 +28,7 @@ const Main = ({ auth, user, showAccountModal, showAboutModal, handlePlay, showSe
           </Dropdown.Toggle>
 
           <Dropdown.Menu>
+            <Dropdown.Header>{user.nickname}</Dropdown.Header>
             <Dropdown.Item onClick={showAccountModal}>Account</Dropdown.Item>
             <Dropdown.Item onClick={showSettingsModal}>Settings</Dropdown.Item>
             <Dropdown.Divider />
@@ -39,6 +40,10 @@ const Main = ({ auth, user, showAccountModal, showAboutModal, handlePlay, showSe
     </Container>
 
     <SystemStats
+      handleRaspberryReboot={handleRaspberryReboot}
+      handleSocketRefresh={handleSocketRefresh}
+      tryPowerOnXbox={tryPowerOnXbox}
+      whatIsLoading={whatIsLoading}
       systemStats={systemStats}
     />
 

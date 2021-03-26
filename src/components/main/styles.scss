@@ -195,6 +195,18 @@
   }
 }
 
-.system-stats{
+.system-stats {
   font-size: 14px !important;
+}
+
+#consoleName {
+  transition: 0.3s;
+  &:hover {
+    transition: 0.3s;
+    transform: scale(1.02);
+  }
+}
+
+.dropdown-toggle::after {
+  display: none;
 }

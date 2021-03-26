@@ -3,7 +3,7 @@ import { Modal, Form, Col, Row, ListGroup, Button } from 'react-bootstrap'
 import { faSyncAlt, faEdit, faSave } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, user, updateNetworkConfig, setClientConfig, appConfig, setApiVersion, getXboxIp, getRaspberryIp, getClientVpnIp, getRaspberryVpnIp, configSaveHandler }) => {
+const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, clearClient, user, autoConfigureClient, updateNetworkConfig, setClientConfig, appConfig, setApiVersion, getXboxIp, getRaspberryIp, getClientVpnIp, getRaspberryVpnIp, configSaveHandler }) => {
 	const { network, raspberryLocalIp, xboxId, xboxIp } = clientConfig
 	const { apiVersion } = appConfig
 	const [fieldValue, setFieldValue] = useState({})
@@ -25,12 +25,14 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, user, updat
 	})
 
 	const saveConfigHandler = (parameter, value) => {
-		if (parameter === 'xboxId') {
-			setClientConfig({ [parameter]: value })
-		} else {
-			updateNetworkConfig({ [parameter]: value })
-		}
+		if (value && value !== '') {
+			if (parameter === 'xboxId') {
+				setClientConfig({ [parameter]: value })
+			} else {
+				updateNetworkConfig({ [parameter]: value })
+			}
 
+		}
 		setCanBeEdited({ ...canBeEdited, [parameter]: false })
 	}
 
@@ -65,7 +67,7 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, user, updat
 									{raspberryLocalIp || 'unknown'}
 								</div>
 								<div className="col-2">
-									<FontAwesomeIcon className='mx-2 cursor-pointer' icon={faSyncAlt} onClick={getRaspberryIp} spin={whatIsLoading.raspLocalIp} />
+									<FontAwesomeIcon className='mx-2 cursor-pointer' icon={faSyncAlt} onClick={() => getRaspberryIp()} spin={whatIsLoading.raspLocalIp} />
 								</div>
 							</div>
 						</ListGroup.Item>
@@ -107,7 +109,7 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, user, updat
 									{xboxIp || 'unknown'}
 								</div>
 								<div className="col-2">
-									<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getXboxIp} spin={whatIsLoading.xboxIp} />
+									<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getXboxIp} spin={whatIsLoading.xboxData} />
 								</div>
 							</div>
 						</ListGroup.Item>
@@ -189,17 +191,20 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, user, updat
 								</div>
 								<div className="col-2">
 									{
-										!canBeEdited.xboxId ?
-											<FontAwesomeIcon
-												className='mx-2'
-												icon={faEdit}
-												onClick={() => setCanBeEdited({ ...canBeEdited, 'xboxId': !canBeEdited.xboxId })}
-											/> :
-											<FontAwesomeIcon
-												className='mx-2'
-												icon={faSave}
-												onClick={() => saveConfigHandler('xboxId', xboxIdRef.current.value)}
-											/>
+										whatIsLoading.xboxData ?
+											<FontAwesomeIcon icon={faSyncAlt} spin className='mx-2' />
+											:
+											!canBeEdited.xboxId ?
+												<FontAwesomeIcon
+													className='mx-2'
+													icon={faEdit}
+													onClick={() => setCanBeEdited({ ...canBeEdited, 'xboxId': !canBeEdited.xboxId })}
+												/> :
+												<FontAwesomeIcon
+													className='mx-2'
+													icon={faSave}
+													onClick={() => saveConfigHandler('xboxId', xboxIdRef.current.value)}
+												/>
 									}
 								</div>
 							</div>
@@ -209,7 +214,8 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, user, updat
 			</Modal.Body>
 
 			<Modal.Footer>
-				{/* <Button variant='secondary' onClick={setShow}>Close</Button> */}
+				<Button variant='secondary' onClick={() => clearClient()}>Clear</Button>
+				<Button variant='secondary' onClick={() => autoConfigureClient()}>Config</Button>
 				<Button variant='primary' onClick={configSaveHandler}>Save</Button>
 			</Modal.Footer>
 		</Modal>

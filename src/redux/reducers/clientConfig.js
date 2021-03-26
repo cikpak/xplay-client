@@ -15,7 +15,6 @@ const initialState = {
 };
 
 export default function (state = initialState, action) {
-
   switch (action.type) {
     case SET_CLIENT_CONFIG: {
       return {
@@ -24,7 +23,6 @@ export default function (state = initialState, action) {
       };
     }
     case UPDATE_NETWORK_DATA: {
-      console.log('action.payload', action.payload)
       return {
         ...state,
         network: {

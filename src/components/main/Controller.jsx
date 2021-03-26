@@ -18,7 +18,9 @@ const store = require('../../store')
 import Main from './main.jsx'
 import env from '../../env'
 import axios from 'axios'
+import EnterZerotierIdModal from './EnterZerotierIdModal.jsx'
 
+// const EnterZerotierIdModal = lazy(() => import('./EnterZerotierIdModal.jsx'))
 const EditProfileModal = lazy(() => import('./EditProfileModal.jsx'))
 
 class Controller extends Component {
@@ -26,18 +28,22 @@ class Controller extends Component {
         super(props)
 
         this.state = {
+            socket: undefined,
             readyToPlay: true,
             isLoading: false,
             showSettings: false,
             showAccount: false,
             showAbout: false,
             err: null,
+            update: true,
             whatIsLoading: {
                 raspLocalIp: false,
+                raspReboot: false,
                 clientVpnIp: false,
                 raspVpnIp: false,
                 netTest: false,
-                xboxIp: false
+                xboxData: false,
+                findXbox: false
             },
             netStats: {
                 netTestError: false,
@@ -56,23 +62,36 @@ class Controller extends Component {
                     wifi: false,
                     ethernet: false
                 },
+            },
+            wizard: {
+                enterZerotierId: false,
+                enterXboxId: false
             }
         }
 
         this.checkNetConnectionStatus = this.checkNetConnectionStatus.bind(this)
         this.updateParameterHandler = this.updateParameterHandler.bind(this)
+        this.handleRaspberryReboot = this.handleRaspberryReboot.bind(this)
         this.accountUpdateHandler = this.accountUpdateHandler.bind(this)
         this.getClientTailscaleIp = this.getClientTailscaleIp.bind(this)
         this.setZerotierIdHandler = this.setZerotierIdHandler.bind(this)
         this.socketConnectHandler = this.socketConnectHandler.bind(this)
+        this.handleSocketRefresh = this.handleSocketRefresh.bind(this)
         this.getClientZerotierIp = this.getClientZerotierIp.bind(this)
+        this.autoConfigureClient = this.autoConfigureClient.bind(this)
+        this.handleWizardSubmit = this.handleWizardSubmit.bind(this)
         this.getRaspberryVpnIp = this.getRaspberryVpnIp.bind(this)
         this.configSaveHandler = this.configSaveHandler.bind(this)
         this.testNetConnection = this.testNetConnection.bind(this)
+        this.tryPowerOnXbox = this.tryPowerOnXbox.bind(this)
         this.getRaspberryIp = this.getRaspberryIp.bind(this)
         this.getClientVpnIp = this.getClientVpnIp.bind(this)
         this.setApiversion = this.setApiversion.bind(this)
+        this.setShowWizard = this.setShowWizard.bind(this)
+        this.setModalShow = this.setModalShow.bind(this)
         this.setIsLoading = this.setIsLoading.bind(this)
+        this.clearClient = this.clearClient.bind(this)
+        this.hideAndSeek = this.hideAndSeek.bind(this)
         this.handlePlay = this.handlePlay.bind(this)
         this.showToast = this.showToast.bind(this)
     }
@@ -176,30 +195,35 @@ class Controller extends Component {
     }
 
     //GET RASPBERRY IP USING CENTRAL API SERVER AND SOCKETS
-    getRaspberryIp() {
+    getRaspberryIp(callback = null) {
         const { setClientConfig, auth, setUserInfo, user } = this.props
         const { exec } = require("child_process");
         this.setIsLoading('raspLocalIp', true)
+
         const getRaspberryIpScriptPath = path.resolve('scripts/raspIp.bat');
 
         try {
             if (user.isClientConfigured) {
                 //client olready got the rasp ip in local network and send user id to raspberry
                 axios({
-                    url: `${env.API_BASE_URL}/raspberry/local-ip`,
+                    url: env.GET_RASPBERRY_LOCAL_IP,
                     headers: {
                         'Authorization': `Bearer ${auth.tokens.token}`
-                    }
+                    },
                 })
                     .then(response => {
+                        console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
                         setClientConfig({ raspberryLocalIp: response.data.raspberryIp })
+
+                        if (callback) {
+                            callback()
+                        }
+
                         this.setIsLoading('raspLocalIp', false)
                     })
                     .catch(err => {
                         console.log('err', err)
-                        this.setIsLoading('raspLocalIp', false)
                     })
-
             } else {
                 //client is not configured, rasp ip is unknown and raspberry doesn't know user id
                 exec(getRaspberryIpScriptPath, (error, stdout, stderr) => {
@@ -225,18 +249,23 @@ class Controller extends Component {
                                         .then(response => {
                                             if (response.status === 200 && response.data.success) {
                                                 setUserInfo({ isClientConfigured: true })
-                                                this.setIsLoading('raspLocalIp', false)
-                                            } else {
-                                                console.log('Failed to set client as configured in database')
+
+                                                if (callback) {
+                                                    console.log('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')
+                                                    callback()
+                                                }
                                             }
+                                            this.setIsLoading('raspLocalIp', false)
                                         }).catch(err => {
+                                            this.setIsLoading('raspLocalIp', false)
                                             console.log('err', err)
                                         })
+                                } else {
+                                    this.setIsLoading('raspLocalIp', false)
                                 }
                             })
                             .catch(err => {
                                 console.log('err :>> ', err);
-                                this.setIsLoading('raspLocalIp', false)
                             })
                     } else {
                         console.log('get raspberry ip fail ');
@@ -259,53 +288,6 @@ class Controller extends Component {
 
         this.setState({ ...this.state, showZerotierModal: false })
     }
-
-    //getRaspberryVpnIp using direct connection
-    // getRaspberryVpnIp = async () => {
-    //     const { clientConfig, appConfig } = this.props
-    //     const { network, raspberryLocalIp } = clientConfig
-    //     this.setIsLoading('raspVpnIp', true)
-
-    //     let url = ''
-
-    //     if (network.tailscaleIp || network.zerotierIp) {
-    //         if (network.tailscaleId) {
-    //             url = `http://${network.tailscaleIp || network.zerotierIp}:8000/v2/join`
-    //         } else {
-    //             url = `http://${network.tailscaleIp || network.zerotierIp}:8000/join`
-    //         }
-    //     } else if (raspberryLocalIp) {
-    //         url = `http://${raspberryLocalIp}:8000/join`
-    //     } else {
-    //         this.showToast('error', 'n-ai cum, nu e configurat nici un ip')
-    //     }
-
-    //     const data = {}
-    //     data[appConfig.apiVersion === '1' ? 'zerotier_network_id' : 'tailscale_id'] = appConfig.apiVersion === '1' ? network.zerotierId : network.tailscaleId
-
-    //     axios({
-    //         url,
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         data,
-    //     })
-    //         .then(response => {
-    //             console.log('response :>> ', response);
-    //             if (response.status === 200) {
-    //                 const { data } = response
-    //                 this.props.updateNetworkConfig({ [appConfig.apiVersion === '1' ? 'zerotierIp' : 'tailscaleIp']: data.rasp_ip })
-    //             } else {
-    //                 this.showToast('error', 'HELLO DIN ELSE, CEVA NU A MERS BINE :( ');
-    //             }
-    //         })
-    //         .catch(err => this.showToast('error', 'Failed to get raspberry vpn ip!'))
-    //         .finally(() => {
-    //             this.setIsLoading('raspVpnIp', false)
-    //         })
-    // }
-
 
     //getRaspberryVpnIp using central server
     getRaspberryVpnIp = async () => {
@@ -355,47 +337,14 @@ class Controller extends Component {
         this.props.updateNetworkConfig(config)
     }
 
-    //GET XBOX IP USING DIRRECT CONNECTION
-    // getXboxIp = async () => {
-    //     const { raspberryLocalIp, network } = this.props.clientConfig
-    //     this.setIsLoading('xboxIp', true)
-
-    //     try {
-    //         let url = ''
-    //         if (network.tailscaleIp || network.zerotierIp) {
-    //             url = `http://${network.tailscaleIp || network.zerotierIp}:8000/xbox-ip`
-    //         } else if (raspberryLocalIp) {
-    //             url = `http://${raspberryLocalIp}:8000/xbox-ip`
-    //         } else {
-    //             this.showToast('error', 'n-ai cum, nu e configurat nici un ip')
-    //         }
-
-    //         axios({ url })
-    //             .then(response => {
-    //                 if (response.status === 200) {
-    //                     const { data } = response
-    //                     this.props.setClientConfig({
-    //                         xboxIp: data.xbox_ip
-    //                     })
-    //                 }
-    //             })
-    //             .catch(err => console.log('err', err))
-    //             .finally(() => {
-    //                 this.setIsLoading('xboxIp', false)
-    //             })
-    //     } catch (error) {
-    //         console.log('error :>> ', error);
-    //         this.setIsLoading('xboxIp', false)
-    //     }
-    // }
-
-    getXboxIp = async () => {
-        const { auth } = this.props
-        this.setIsLoading('xboxIp', true)
+    getXboxData = async () => {
+        const { auth, setClientConfig } = this.props
+        this.setIsLoading('xboxData', true)
 
         try {
             axios({
-                url: `${env.API_BASE_URL}/console/ip`, headers: {
+                url: env.GET_XBOX_DATA,
+                headers: {
                     'Authorization': `Bearer ${auth.tokens.token}`
                 }
             })
@@ -405,17 +354,18 @@ class Controller extends Component {
                         const { data } = response
 
                         this.props.setClientConfig({
-                            xboxIp: data.xboxIp
+                            xboxIp: data.xboxIp,
+                            xboxId: data.xboxId
                         })
                     }
                 })
                 .catch(err => console.log('err', err))
                 .finally(() => {
-                    this.setIsLoading('xboxIp', false)
+                    this.setIsLoading('xboxData', false)
                 })
         } catch (error) {
             console.log('error :>> ', error);
-            this.setIsLoading('xboxIp', false)
+            this.setIsLoading('xboxData', false)
         }
     }
 
@@ -467,7 +417,6 @@ class Controller extends Component {
         }
     }
 
-
     updateParameterHandler = (value) => {
         const { updateNetworkConfig } = this.props
         const { editParameter } = this.state
@@ -500,43 +449,91 @@ class Controller extends Component {
 
     }
 
-    socketConnectHandler(raspberryIp) {
-        const socket = io.connect(`http://${raspberryIp}:8000`, {
-            reconnect: true,
-            timeout: 1
-        })
+    socketConnectHandler(raspberryIp, newSocket = false) {
+        const { setClientConfig } = this.props
+        if (newSocket) {
+            console.log('new socket, killing old socket');
+            if (this.state.socket) {
+                this.state.socket.disconnect()
+            }
+        }
 
-        socket.on('connect', () => {
-            this.setState({
-                ...this.state,
-                systemStats: {
-                    ...this.state.systemStats,
-                    raspberry: true
-                }
+        try {
+            const socket = io.connect(`http://${raspberryIp}:8000`, {
+                forceNew: true,
+                reconnection: true,
+                reconnectionDelay: 3000,
+                reconnectionAttempts: 100,
+                forceNew: true
             })
-        })
 
-        socket.on('reconnect', () => {
-            this.setState({
-                ...this.state,
-                systemStats: {
-                    ...this.state.systemStats,
-                    raspberry: true
-                }
+            this.setState({ ...this.state, socket })
+
+            socket.on('connect', () => {
+                console.log('connect :>> ');
+                this.setState({
+                    ...this.state,
+                    whatIsLoading: {
+                        ...this.state.whatIsLoading,
+                        raspReboot: false
+                    },
+                    systemStats: {
+                        ...this.state.systemStats,
+                        raspberry: true
+                    }
+                })
             })
-        })
 
-        socket.on('disconnect', () => {
-            console.log('disconnected')
-
-            this.setState({
-                ...this.state,
-                systemStats: {
-                    ...this.state.systemStats,
-                    raspberry: false
-                }
+            socket.on('reconnect', () => {
+                console.log('reconnect :>> ', reconnect);
+                this.setState({
+                    ...this.state,
+                    whatIsLoading: {
+                        ...this.state.whatIsLoading,
+                        raspReboot: false
+                    },
+                    systemStats: {
+                        ...this.state.systemStats,
+                        raspberry: true
+                    }
+                })
             })
-        })
+
+            socket.io.on("reconnection_attempt", () => {
+                console.log('reconnection_attempt');
+            });
+
+            socket.io.on("reconnect", () => {
+                console.log('reconnect');
+            });
+
+            socket.on("connect_error", () => {
+                console.log('connection error');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('disconnected')
+
+                this.setState({
+                    ...this.state,
+                    systemStats: {
+                        ...this.state.systemStats,
+                        raspberry: false
+                    }
+                })
+            })
+
+            socket.on('xbox find finish', (data) => {
+                const { success, msg } = data
+
+                this.showToast(success ? 'success' : 'error', msg)
+
+                if (success) setClientConfig({ ...data })
+                this.setIsLoading('findXbox', false)
+            })
+        } catch (error) {
+            this.showToast('error', 'Websocket error!')
+        }
     }
 
     componentWillMount() {
@@ -585,6 +582,10 @@ class Controller extends Component {
     }
 
     componentWillUnmount() {
+        if (this.state.socket) {
+            this.state.socket.disconnect()
+        }
+
         window.removeEventListener('beforeunload', this.configSaveHandler, false)
     }
 
@@ -786,16 +787,227 @@ class Controller extends Component {
             })
     }
 
+    handleRaspberryReboot() {
+        const { auth } = this.props
+
+        axios({
+            url: env.REBOOT_RASPBERRY,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${auth.tokens.token}`
+            }
+        })
+            .then(response => {
+                console.log('response :>> ', response);
+                this.setIsLoading('raspReboot', true)
+            })
+            .catch(err => {
+                console.log('err :>> ', err);
+
+                if (err.response) {
+                    const { response } = err
+                    console.log('response :>> ', response);
+                    this.showToast(error, 'Failed to reboot raspberry!')
+                }
+            })
+    }
+
+    handleSocketRefresh() {
+        const { clientConfig } = this.props
+        let raspberryIp = clientConfig.raspberryLocalIp
+
+        if (this.props.appConfig.apiVersion === '1' && clientConfig.network.zerotierIp) {
+            raspberryIp = clientConfig.network.zerotierIp
+        } else if (this.props.appConfig.apiVersion === '2' && clientConfig.network.tailscaleIp) {
+            raspberryIp = clientConfig.network.tailscaleIp
+        }
+
+        this.socketConnectHandler(raspberryIp, true)
+    }
+
+    setShowWizard(parameter) {
+        this.setState({
+            ...this.state, wizard: {
+                ...this.state.wizard,
+                [parameter]: !this.state.wizard[parameter]
+            }
+        })
+    }
+
+    setModalShow(parameter) {
+        this.setState({
+            ...this.state,
+            [parameter]: !this.state[parameter]
+        })
+    }
+
+    //auto configure client
+    autoConfigureClient(vpnNetworkId = null) {
+        //TODO - fix bug with null vpn ID after wizard hide and recall auto config
+        const { clientConfig, auth, updateNetworkConfig } = this.props
+        const { network, raspberryLocalIp, isClientConfigured, xboxIp, xboxId } = clientConfig
+        const { zerotierIp, zerotierId, tailscaleIp, tailscaleId, clientZerotierIp, clientTailscaleIp } = network
+
+        if (vpnNetworkId) {
+            updateNetworkConfig({ zerotierId: vpnNetworkId })
+        }
+
+        if (!zerotierId && !vpnNetworkId) {
+            console.log('nu e setat zerotier id, se cere')
+            //please client to enter zerotier id and get client and raspberry zerotier ip
+            this.setState((state, props) => {
+                return {
+                    ...state,
+                    showSettings: false,
+                    wizard: {
+                        ...state.wizard,
+                        enterZerotierId: true
+                    }
+                }
+            })
+        } else {
+            console.log('zerotier id setat, se verifica daca este ip pentru client si rasp');
+            this.setState((state, props) => {
+                console.log('state :>> ', state);
+                return {
+                    ...state,
+                    showSettings: true,
+                    wizard: {
+                        ...state.wizard,
+                        enterZerotierId: false
+                    }
+                }
+            })
+            if (!raspberryLocalIp) {
+                this.getRaspberryIp(() => {
+                    if (!zerotierIp) {
+                        console.log('nu este setat zerotier ip, se cere');
+                        this.getRaspberryVpnIp()
+                    }
+
+                    if (!clientZerotierIp) {
+                        console.log('nu este setat client zerotier ip, se cere');
+                        this.getClientVpnIp()
+                    }
+
+                    if (!xboxIp) {
+                        console.log('nu este setat xbox ip, se cere de la rasp');
+                        this.getXboxData()
+                    }
+                })
+            } else {
+                console.log('este local rasp ip')
+                if (!zerotierIp) {
+                    console.log('nu este setat zerotier ip, se cere');
+                    this.getRaspberryVpnIp()
+                }
+
+                if (!clientZerotierIp) {
+                    console.log('nu este setat client zerotier ip, se cere');
+                    this.getClientVpnIp()
+                }
+
+                if (!xboxIp || !xboxId) {
+                    console.log('nu este setat xbox ip, se cere de la rasp');
+                    this.getXboxData()
+                }
+            }
+        }
+    }
+
+    hideAndSeek() {
+        this.setState((state, props) => {
+            const newState = {
+                ...state,
+                showSettings: true,
+                wizard: {
+                    ...state.wizard,
+                    enterZerotierId: false
+                }
+            }
+            return newState
+        })
+    }
+
+    handleWizardSubmit(fields) {
+        this.autoConfigureClient(fields.zerotierId)
+        this.hideAndSeek()
+    }
+
+    clearClient() {
+        const { auth } = this.props
+
+        axios({
+            url: env.SAVE_CONFIG_URL,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${auth.tokens.token}`
+            },
+            data: {
+                "network": {
+                    "tailscaleId": null,
+                    "zerotierId": null,
+                    "zerotierIp": null,
+                    "tailscaleIp": null,
+                    "clientZerotierIp": null,
+                    "clientTailscaleIp": null
+                },
+                "xboxId": null,
+                "xboxIp": null,
+                "raspberryLocalIp": null
+            },
+        }).then(response => {
+            console.log(`response`, response)
+        })
+    }
+
+    tryPowerOnXbox() {
+        this.setIsLoading('findXbox', true)
+        const { auth } = this.props
+
+        axios({
+            url: env.TRY_POWER_ON_XBOX,
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${auth.tokens.token}`
+            },
+        })
+            .then(response => {
+                if (response.data.success === true) {
+                    this.showToast('success', response.data.msg)
+                } else {
+                    this.showToast('error', response.data.msg)
+                }
+            })
+            .catch(err => {
+                console.log(`err`, err)
+                this.showToast('error', 'Failed to find xbox!')
+            })
+    }
+
+
     render() {
-        const { netStats, showSettings, showAbout, whatIsLoading, systemStats, showAccount } = this.state
+        const { netStats, showSettings, showAbout, whatIsLoading, systemStats, showAccount, wizard } = this.state
         const { auth, clientConfig, appConfig, setClientConfig, updateNetworkConfig, user } = this.props
 
         return <Fragment>
+            <EnterZerotierIdModal
+                show={this.state.wizard.enterZerotierId}
+                setShow={this.setShowWizard}
+                setShowModal={this.setModalShow}
+                updateNetworkConfig={updateNetworkConfig}
+                handleWizardSubmit={this.handleWizardSubmit}
+            />
+
             < Main
+                showAboutModal={() => this.setState({ ...this.state, showAbout: !this.state.showAbout })}
                 showSettingsModal={() => this.setState({ ...this.state, showSettings: !showSettings })}
                 showAccountModal={() => this.setState({ ...this.state, showAccount: !showAccount })}
-                showAboutModal={() => this.setState({ ...this.state, showAbout: !this.state.showAbout })}
+                handleRaspberryReboot={this.handleRaspberryReboot}
+                handleSocketRefresh={this.handleSocketRefresh}
                 testNetConnection={this.testNetConnection}
+                tryPowerOnXbox={this.tryPowerOnXbox}
                 whatIsLoading={whatIsLoading}
                 handlePlay={this.handlePlay}
                 systemStats={systemStats}
@@ -814,20 +1026,22 @@ class Controller extends Component {
             <SettingsModal
                 setShow={() => this.setState({ ...this.state, showSettings: !showSettings })}
                 getClientZerotierIp={this.getClientZerotierIp}
-                getRaspberryVpnIp={this.getRaspberryVpnIp}
+                autoConfigureClient={this.autoConfigureClient}
                 configSaveHandler={this.configSaveHandler}
+                getRaspberryVpnIp={this.getRaspberryVpnIp}
                 updateNetworkConfig={updateNetworkConfig}
                 getClientVpnIp={this.getClientVpnIp}
                 getRaspberryIp={this.getRaspberryIp}
                 setApiVersion={this.setApiversion}
                 showEditModal={this.showEditModal}
                 setClientConfig={setClientConfig}
+                clearClient={this.clearClient}
                 whatIsLoading={whatIsLoading}
                 clientConfig={clientConfig}
-                getXboxIp={this.getXboxIp}
-                user={user}
+                getXboxIp={this.getXboxData}
                 appConfig={appConfig}
                 show={showSettings}
+                user={user}
             />
 
             <Suspense fallback={<Fragment />}>

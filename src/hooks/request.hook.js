@@ -28,7 +28,7 @@ export const useRequest = () => {
       } catch (error) {
         setErr(error.message || "A aparut o eroare, incercati din nou!");
         setLoading(false);
-        return undefined;
+        return error;
       }
     },
     []

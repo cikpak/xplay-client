@@ -11,6 +11,10 @@ export default {
   SAVE_CONFIG_URL: `${API_BASE_URL}/user/client`,
   JOIN_NETWORK: `${API_BASE_URL}/raspberry/join/`,
   SET_CONFIGURED_CLIENT: `${API_BASE_URL}/client/hello`,
+  REBOOT_RASPBERRY: `${API_BASE_URL}/raspberry/reboot`,
+  GET_RASPBERRY_LOCAL_IP: `${API_BASE_URL}/raspberry/local-ip`,
+  GET_XBOX_DATA: `${API_BASE_URL}/console/data`,
+  TRY_POWER_ON_XBOX: `${API_BASE_URL}/console/power-on`,
 
   //utils
   GET_EXTERNAL_IP: 'https://myexternalip.com/json',

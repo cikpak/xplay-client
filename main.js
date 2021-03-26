@@ -1,6 +1,5 @@
 "use strict";
 const { app, BrowserWindow } = require("electron");
-
 const path = require("path");
 const url = require("url");
 
@@ -8,7 +7,21 @@ require('./ipc/mainWindow')
 
 //create electrone-store instance
 let Store = require('electron-store')
-const store = new Store()
+const store = new Store({
+  defaults: {
+    apiVersion: "2",
+    netTest: {
+      netTestErrorStr: null,
+      netTestError: false,
+      lostPackages: false,
+      ping: null,
+      min: null,
+      max: null,
+      data: [],
+    },
+    isClientConfigured: false
+  }
+})
 
 let dev = false;
 let mainWindow;
