@@ -3,8 +3,9 @@ import { Modal, Form, Col, Row, ListGroup, Button } from 'react-bootstrap'
 import { faSyncAlt, faEdit, faSave } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, clearClient, user, autoConfigureClient, updateNetworkConfig, setClientConfig, appConfig, setApiVersion, getXboxIp, getRaspberryIp, getClientVpnIp, getRaspberryVpnIp, configSaveHandler }) => {
+const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, userInfo, clearClient, user, autoConfigureClient, updateNetworkConfig, setClientConfig, appConfig, setApiVersion, getXboxIp, getRaspberryIp, getClientVpnIp, getRaspberryVpnIp, configSaveHandler }) => {
 	const { network, raspberryLocalIp, xboxId, xboxIp } = clientConfig
+	const { isClientConfigured } = userInfo
 	const { apiVersion } = appConfig
 	const [fieldValue, setFieldValue] = useState({})
 	const zerotierIdRef = useRef(null)
@@ -12,12 +13,7 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, clearClient
 	const xboxIdRef = useRef(null)
 
 	//TODO - add can be eddited functionality
-	const refsObj = {
-		xboxId: xboxIdRef,
-		tailscaleId: tailscaleIdRef,
-		zerotierId: zerotierIdRef
-	}
-
+	
 	const [canBeEdited, setCanBeEdited] = useState({
 		xboxId: false,
 		tailscaleId: false,
@@ -55,167 +51,177 @@ const SettingsModal = ({ show, setShow, whatIsLoading, clientConfig, clearClient
 							</Form.Control>
 						</Form.Group>
 					</Col>
-
-					<Col sm='12'>
-						<h5 className='text-center'>Client config | Configured: {user.isClientConfigured ? 'true' : 'false'}</h5>
-						<ListGroup.Item>
-							<div className="row">
-								<div className="col-5">
-									<b className='mr-2 d-block text-right'>Rasp local IP:</b>
-								</div>
-								<div className="col-5">
-									{raspberryLocalIp || 'unknown'}
-								</div>
-								<div className="col-2">
-									<FontAwesomeIcon className='mx-2 cursor-pointer' icon={faSyncAlt} onClick={() => getRaspberryIp()} spin={whatIsLoading.raspLocalIp} />
-								</div>
-							</div>
-						</ListGroup.Item>
-
-						<ListGroup.Item>
-							<div className="row">
-								<div className="col-5">
-									<b className='mr-2 d-block text-right'>Rasp {apiVersion === '1' ? 'zerotier' : 'tailscale'} IP:</b>
-								</div>
-								<div className="col-5">
-									{apiVersion === '1' ? network.zerotierIp ? network.zerotierIp : 'unknown' : network.tailscaleIp ? network.tailscaleIp : 'uknown'}
-								</div>
-								<div className="col-2">
-									<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getRaspberryVpnIp} spin={whatIsLoading.raspVpnIp} />
-								</div>
-							</div>
-						</ListGroup.Item>
-
-						<ListGroup.Item>
-							<div className="row">
-								<div className="col-5">
-									<b className='mr-2 d-block text-right'>{apiVersion === '1' ? 'zerotier' : 'tailscale'} IP:</b>
-								</div>
-								<div className="col-5">
-									{apiVersion === '1' ? network.clientZerotierIp ? network.clientZerotierIp : 'unknown' : network.clientTailscaleIp ? network.clientTailscaleIp : 'uknown'}
-								</div>
-								<div className="col-2">
-									<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getClientVpnIp} spin={whatIsLoading.clientVpnIp} />
-								</div>
-							</div>
-						</ListGroup.Item>
-
-						<ListGroup.Item>
-							<div className="row">
-								<div className="col-5">
-									<b className='mr-2 d-block text-right'>Xbox IP:</b>
-								</div>
-								<div className="col-5">
-									{xboxIp || 'unknown'}
-								</div>
-								<div className="col-2">
-									<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getXboxIp} spin={whatIsLoading.xboxData} />
-								</div>
-							</div>
-						</ListGroup.Item>
-
-						{
-							apiVersion === '1' ?
-								<ListGroup.Item >
+					{
+						!isClientConfigured && !(!!network.zerotierId || !!network.tailscaleId) ?
+							<Col xs='12' className='' id='unconfiguredClient'>
+								<Row className="h-100 align-items-center">
+									<Col xs='12' className='mx-auto align-content-center text-center '>
+										<h5>Client is unconfigured!</h5>
+										<Button variant='primary' onClick={() => autoConfigureClient()}>Config</Button>
+									</Col>
+								</Row>
+							</Col>
+							:
+							<Col sm='12'>
+								<h5 className='text-center'>Client config | Configured: {user.isClientConfigured ? 'true' : 'false'}</h5>
+								<ListGroup.Item>
 									<div className="row">
 										<div className="col-5">
-											<b className='mr-2 d-block text-right'>Zerotier id:</b>
+											<b className='mr-2 d-block text-right'>Rasp local IP:</b>
 										</div>
 										<div className="col-5">
-											{
-												canBeEdited.zerotierId ?
-													<Form.Control type="text" name='zerotierId' ref={zerotierIdRef} onChange={event => setFieldValue({ ...fieldValue, 'zerotierId': event.target.value })} /> :
-													network.zerotierId || 'unknown'
-											}
+											{raspberryLocalIp || 'unknown'}
 										</div>
 										<div className="col-2">
-											{
-												!canBeEdited.zerotierId ?
-													<FontAwesomeIcon
-														className='mx-2'
-														icon={faEdit}
-														onClick={() => setCanBeEdited({ ...canBeEdited, 'zerotierId': !canBeEdited.zerotierId })}
-													/> :
-													<FontAwesomeIcon
-														className='mx-2'
-														icon={faSave}
-														onClick={() => saveConfigHandler('zerotierId', zerotierIdRef.current.value)}
-													/>
-											}
+											<FontAwesomeIcon className='mx-2 cursor-pointer' icon={faSyncAlt} onClick={() => getRaspberryIp()} spin={whatIsLoading.raspLocalIp} />
 										</div>
 									</div>
-								</ListGroup.Item> :
+								</ListGroup.Item>
 
-								<ListGroup.Item >
+								<ListGroup.Item>
 									<div className="row">
 										<div className="col-5">
-											<b className='mr-2 d-block text-right'>Tailscale id:</b>
+											<b className='mr-2 d-block text-right'>Rasp {apiVersion === '1' ? 'zerotier' : 'tailscale'} IP:</b>
+										</div>
+										<div className="col-5">
+											{apiVersion === '1' ? network.zerotierIp ? network.zerotierIp : 'unknown' : network.tailscaleIp ? network.tailscaleIp : 'uknown'}
+										</div>
+										<div className="col-2">
+											<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getRaspberryVpnIp} spin={whatIsLoading.raspVpnIp} />
+										</div>
+									</div>
+								</ListGroup.Item>
+
+								<ListGroup.Item>
+									<div className="row">
+										<div className="col-5">
+											<b className='mr-2 d-block text-right'>{apiVersion === '1' ? 'zerotier' : 'tailscale'} IP:</b>
+										</div>
+										<div className="col-5">
+											{apiVersion === '1' ? network.clientZerotierIp ? network.clientZerotierIp : 'unknown' : network.clientTailscaleIp ? network.clientTailscaleIp : 'uknown'}
+										</div>
+										<div className="col-2">
+											<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getClientVpnIp} spin={whatIsLoading.clientVpnIp} />
+										</div>
+									</div>
+								</ListGroup.Item>
+
+								<ListGroup.Item>
+									<div className="row">
+										<div className="col-5">
+											<b className='mr-2 d-block text-right'>Xbox IP:</b>
+										</div>
+										<div className="col-5">
+											{xboxIp || 'unknown'}
+										</div>
+										<div className="col-2">
+											<FontAwesomeIcon className='mx-2' icon={faSyncAlt} onClick={getXboxIp} spin={whatIsLoading.xboxData} />
+										</div>
+									</div>
+								</ListGroup.Item>
+
+								{
+									apiVersion === '1' ?
+										<ListGroup.Item >
+											<div className="row">
+												<div className="col-5">
+													<b className='mr-2 d-block text-right'>Zerotier id:</b>
+												</div>
+												<div className="col-5">
+													{
+														canBeEdited.zerotierId ?
+															<Form.Control type="text" name='zerotierId' ref={zerotierIdRef} onChange={event => setFieldValue({ ...fieldValue, 'zerotierId': event.target.value })} /> :
+															network.zerotierId || 'unknown'
+													}
+												</div>
+												<div className="col-2">
+													{
+														!canBeEdited.zerotierId ?
+															<FontAwesomeIcon
+																className='mx-2'
+																icon={faEdit}
+																onClick={() => setCanBeEdited({ ...canBeEdited, 'zerotierId': !canBeEdited.zerotierId })}
+															/> :
+															<FontAwesomeIcon
+																className='mx-2'
+																icon={faSave}
+																onClick={() => saveConfigHandler('zerotierId', zerotierIdRef.current.value)}
+															/>
+													}
+												</div>
+											</div>
+										</ListGroup.Item> :
+
+										<ListGroup.Item >
+											<div className="row">
+												<div className="col-5">
+													<b className='mr-2 d-block text-right'>Tailscale id:</b>
+												</div>
+												<div className="col-5">
+													{
+														canBeEdited.tailscaleId ?
+															<Form.Control type="text" name='tailscaleId' ref={tailscaleIdRef} onChange={event => setFieldValue({ ...fieldValue, 'tailscaleId': event.target.value })} /> :
+															network.tailscaleId ? `${network.tailscaleId.slice(0, 8)}...${network.tailscaleId.slice(network.tailscaleId.length - 5)} ` : 'unknown'
+													}
+												</div>
+												<div className="col-2">
+													{
+														!canBeEdited.tailscaleId ?
+															<FontAwesomeIcon
+																className='mx-2'
+																icon={faEdit}
+																onClick={() => setCanBeEdited({ ...canBeEdited, 'tailscaleId': !canBeEdited.tailscaleId })}
+															/> :
+															<FontAwesomeIcon
+																className='mx-2'
+																icon={faSave}
+																onClick={() => saveConfigHandler('tailscaleId', tailscaleIdRef.current.value)}
+															/>
+													}
+												</div>
+											</div>
+										</ListGroup.Item>
+								}
+
+								<ListGroup.Item>
+									<div className="row">
+										<div className="col-5">
+											<b className='mr-2 d-block text-right'>Xbox ID:</b>
 										</div>
 										<div className="col-5">
 											{
-												canBeEdited.tailscaleId ?
-													<Form.Control type="text" name='tailscaleId' ref={tailscaleIdRef} onChange={event => setFieldValue({ ...fieldValue, 'tailscaleId': event.target.value })} /> :
-													network.tailscaleId ? `${network.tailscaleId.slice(0, 8)}...${network.tailscaleId.slice(network.tailscaleId.length - 5)} ` : 'unknown'
+												canBeEdited.xboxId ?
+													<Form.Control type="text" ref={xboxIdRef} onChange={event => setFieldValue({ ...fieldValue, [event.target.name]: event.target.value })} /> :
+													xboxId || 'unknown'
 											}
 										</div>
 										<div className="col-2">
 											{
-												!canBeEdited.tailscaleId ?
-													<FontAwesomeIcon
-														className='mx-2'
-														icon={faEdit}
-														onClick={() => setCanBeEdited({ ...canBeEdited, 'tailscaleId': !canBeEdited.tailscaleId })}
-													/> :
-													<FontAwesomeIcon
-														className='mx-2'
-														icon={faSave}
-														onClick={() => saveConfigHandler('tailscaleId', tailscaleIdRef.current.value)}
-													/>
+												whatIsLoading.xboxData ?
+													<FontAwesomeIcon icon={faSyncAlt} spin className='mx-2' />
+													:
+													!canBeEdited.xboxId ?
+														<FontAwesomeIcon
+															className='mx-2'
+															icon={faEdit}
+															onClick={() => setCanBeEdited({ ...canBeEdited, 'xboxId': !canBeEdited.xboxId })}
+														/> :
+														<FontAwesomeIcon
+															className='mx-2'
+															icon={faSave}
+															onClick={() => saveConfigHandler('xboxId', xboxIdRef.current.value)}
+														/>
 											}
 										</div>
 									</div>
 								</ListGroup.Item>
-						}
-
-						<ListGroup.Item>
-							<div className="row">
-								<div className="col-5">
-									<b className='mr-2 d-block text-right'>Xbox ID:</b>
-								</div>
-								<div className="col-5">
-									{
-										canBeEdited.xboxId ?
-											<Form.Control type="text" ref={xboxIdRef} onChange={event => setFieldValue({ ...fieldValue, [event.target.name]: event.target.value })} /> :
-											xboxId || 'unknown'
-									}
-								</div>
-								<div className="col-2">
-									{
-										whatIsLoading.xboxData ?
-											<FontAwesomeIcon icon={faSyncAlt} spin className='mx-2' />
-											:
-											!canBeEdited.xboxId ?
-												<FontAwesomeIcon
-													className='mx-2'
-													icon={faEdit}
-													onClick={() => setCanBeEdited({ ...canBeEdited, 'xboxId': !canBeEdited.xboxId })}
-												/> :
-												<FontAwesomeIcon
-													className='mx-2'
-													icon={faSave}
-													onClick={() => saveConfigHandler('xboxId', xboxIdRef.current.value)}
-												/>
-									}
-								</div>
-							</div>
-						</ListGroup.Item>
-					</Col>
+							</Col>
+					}
 				</Row>
 			</Modal.Body>
 
 			<Modal.Footer>
 				<Button variant='secondary' onClick={() => clearClient()}>Clear</Button>
-				<Button variant='secondary' onClick={() => autoConfigureClient()}>Config</Button>
 				<Button variant='primary' onClick={configSaveHandler}>Save</Button>
 			</Modal.Footer>
 		</Modal>

@@ -5,8 +5,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import NetTestError from './NetTestError.jsx'
 import NetChart from './NetChart.jsx'
 
-export default function NetStats({ stats, testNetConnection, isLoading, data }) {
+export default function NetStats({ stats, testNetConnection, isClientConfigured, isLoading, data }) {
 	const { ping, min, max, lostPackages } = stats
+	console.log('isClientConfigured :>> ', isClientConfigured);
+
 	return (
 		<Container fluid className='m-0 p-0' id='netStats'>
 			<Row className='m-0 p-0'>
@@ -27,10 +29,10 @@ export default function NetStats({ stats, testNetConnection, isLoading, data }) 
 					</Row>
 				</Col>
 
-				<Col xs={2} className='p-0 d-flex justify-content-center align-items-center' id='testConnectionButton'>
+				<Col xs={2} className={`text-center rounded-circle p-0 d-flex justify-content-center align-items-center ${!isClientConfigured && 'disabled-div'}`} id='testConnectionButton'>
 					{
 						!isLoading ?
-							<div className='text-center rounded-circle' onClick={testNetConnection} >
+							<div onClick={testNetConnection}>
 								<FontAwesomeIcon icon={faTachometerAlt} />
 								<div className='text-center'>Test!</div>
 							</div> :
@@ -45,7 +47,6 @@ export default function NetStats({ stats, testNetConnection, isLoading, data }) 
 					{
 						stats.netTestError ? (
 							<NetTestError
-								// error={stats.netTestErrorStr}
 								error={stats.netTestErrorStr}
 							/>
 						) : (<NetChart data={data} />)
@@ -62,6 +63,6 @@ export default function NetStats({ stats, testNetConnection, isLoading, data }) 
 					</Row>
 				)
 			}
-		</Container>
+		</Container >
 	)
 }

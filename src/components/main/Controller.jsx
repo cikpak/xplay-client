@@ -43,7 +43,8 @@ class Controller extends Component {
                 raspVpnIp: false,
                 netTest: false,
                 xboxData: false,
-                findXbox: false
+                findXbox: false,
+                play: false
             },
             netStats: {
                 netTestError: false,
@@ -107,6 +108,8 @@ class Controller extends Component {
             rasp_local_ip: clientConfig.raspberryLocalIp.replace('\r', '') //TODO - yes, i know
         }
 
+        this.setIsLoading('play', true)
+
         payload['src_ip'] = appConfig.apiVersion === '1' ? clientConfig.network.clientZerotierIp : clientConfig.network.clientTailscaleIp
         payload['src_ip'] = appConfig.apiVersion === '1' ? clientConfig.network.clientZerotierIp : clientConfig.network.clientTailscaleIp
         payload['rasp_vpn_ip'] = appConfig.apiVersion === '1' ? clientConfig.network.zerotierIp : clientConfig.network.tailscaleIp
@@ -124,6 +127,7 @@ class Controller extends Component {
                         const { data } = response
                         exec(env.START_CONSOLE_COMPANION)
                         clipboard.writeText(data.rasp_ip)
+                        this.setIsLoading('play', false)
                     } else {
                         //TODO  - handle other status than 200
                         console.log('response.status :>> ', response.status);
@@ -133,6 +137,7 @@ class Controller extends Component {
                     //TODO  - handle err
                     console.log('HUIAC SI NU MERGE PLAY ');
                     console.log('err.response :>> ', err.response);
+                    this.setIsLoading('play', false)
                 })
         } catch (err) {
             console.error(err);
@@ -212,8 +217,9 @@ class Controller extends Component {
                     },
                 })
                     .then(response => {
-                        console.log('hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
                         setClientConfig({ raspberryLocalIp: response.data.raspberryIp })
+                        this.handleSocketRefresh()
+                        this.testNetConnection()
 
                         if (callback) {
                             callback()
@@ -230,7 +236,8 @@ class Controller extends Component {
                     if (!error) {
                         const raspberryLocalIp = stdout.trim()
                         setClientConfig({ raspberryLocalIp })
-
+                        this.handleSocketRefresh()
+                        this.testNetConnection()
                         //say hello to raspberry and send user id
                         axios({
                             url: `http://${raspberryLocalIp}:8000/hello`,
@@ -251,7 +258,6 @@ class Controller extends Component {
                                                 setUserInfo({ isClientConfigured: true })
 
                                                 if (callback) {
-                                                    console.log('qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')
                                                     callback()
                                                 }
                                             }
@@ -268,7 +274,6 @@ class Controller extends Component {
                                 console.log('err :>> ', err);
                             })
                     } else {
-                        console.log('get raspberry ip fail ');
                         this.setIsLoading('raspLocalIp', false)
                     }
                 });
@@ -587,6 +592,12 @@ class Controller extends Component {
         }
 
         window.removeEventListener('beforeunload', this.configSaveHandler, false)
+    }
+
+    componentDidMount() {
+        if (!this.props.userInfo.isClientConfigured) {
+            this.setState({ ...this.state, showSettings: true })
+        }
     }
 
     setApiversion = (event) => {
@@ -989,7 +1000,7 @@ class Controller extends Component {
 
     render() {
         const { netStats, showSettings, showAbout, whatIsLoading, systemStats, showAccount, wizard } = this.state
-        const { auth, clientConfig, appConfig, setClientConfig, updateNetworkConfig, user } = this.props
+        const { auth, userInfo, clientConfig, appConfig, setClientConfig, updateNetworkConfig, user } = this.props
 
         return <Fragment>
             <EnterZerotierIdModal
@@ -1013,6 +1024,7 @@ class Controller extends Component {
                 systemStats={systemStats}
                 appConfig={appConfig}
                 data={netStats.data}
+                userInfo={userInfo}
                 stats={netStats}
                 auth={auth}
                 user={user}
@@ -1041,6 +1053,7 @@ class Controller extends Component {
                 getXboxIp={this.getXboxData}
                 appConfig={appConfig}
                 show={showSettings}
+                userInfo={userInfo}
                 user={user}
             />
 

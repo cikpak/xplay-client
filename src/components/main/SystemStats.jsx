@@ -10,7 +10,7 @@ import wifi from '../../assets/images/wifi.png'
 import raspberry from '../../assets/images/rasp.png'
 import question from '../../assets/images/question.png'
 
-export default function SystemStats({ systemStats, handleRaspberryReboot, tryPowerOnXbox, whatIsLoading, handleSocketRefresh }) {
+export default function SystemStats({ systemStats, handleRaspberryReboot, isClientConfigured, tryPowerOnXbox, whatIsLoading, handleSocketRefresh }) {
     const { raspReboot } = whatIsLoading
 
     return (
@@ -27,7 +27,7 @@ export default function SystemStats({ systemStats, handleRaspberryReboot, tryPow
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>
-                                <Dropdown.Header>XBOX</Dropdown.Header>
+                                <Dropdown.Header className='text-center'>XBOX</Dropdown.Header>
                                 <Dropdown.Item onClick={tryPowerOnXbox}>Try to on</Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
@@ -63,10 +63,12 @@ export default function SystemStats({ systemStats, handleRaspberryReboot, tryPow
                                     </Dropdown.Toggle>
                                 }
                                 <Dropdown.Menu>
-                                    <Dropdown.Header>Raspberry</Dropdown.Header>
+                                    <Dropdown.Header className='text-center'>Raspberry</Dropdown.Header>
 
-                                    <Dropdown.Item onClick={handleSocketRefresh}>Reconnect</Dropdown.Item>
-                                    <Dropdown.Item onClick={handleRaspberryReboot}>Restart</Dropdown.Item>
+                                    {!isClientConfigured && <div className='text-center bg-warning py-1 text-black-50'>dissconected</div>}
+
+                                    <Dropdown.Item onClick={handleSocketRefresh} disabled={!systemStats.raspberry}>Reconnect</Dropdown.Item>
+                                    <Dropdown.Item onClick={handleRaspberryReboot} disabled={!systemStats.raspberry}>Restart</Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
                         </Col>

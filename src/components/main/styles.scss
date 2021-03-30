@@ -201,6 +201,7 @@
 
 #consoleName {
   transition: 0.3s;
+  
   &:hover {
     transition: 0.3s;
     transform: scale(1.02);
@@ -209,4 +210,17 @@
 
 .dropdown-toggle::after {
   display: none;
+}
+
+#unconfiguredClient {
+  height: 150px;
+}
+
+.disabled-div {
+  pointer-events: none;
+  opacity: 0.5;
+
+  &:hover{
+
+  }
 }
